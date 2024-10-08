@@ -7,12 +7,12 @@ state([
     'domain' => ''
 ]);
 
-mount(function () {
-    dd('oi');
-});
+// mount(function () {
+//     dd('oi');
+// });
 
 $saveForm = function () {
-    dd($this);
+    // dd($this);
     $this->validate([
         'domain' => 'string'
     ]);
