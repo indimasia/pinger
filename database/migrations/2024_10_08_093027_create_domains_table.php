@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('domains', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('webhook_url')->nullable();
             $table->string('reference')->nullable();
             $table->tinyInteger('status')->default(0);
             $table->timestamps();

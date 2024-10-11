@@ -11,6 +11,7 @@ class Domain extends Model
     protected $fillable = [
         'name',
         'status',
-        'reference'
+        'reference',
+        'webhook_url'
     ];
 }
