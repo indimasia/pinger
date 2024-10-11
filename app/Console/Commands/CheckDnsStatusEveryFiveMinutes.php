@@ -2,11 +2,14 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Spatie\Dns\Dns;
 use App\Models\Domain;
-use Exception;
+use Acamposm\Ping\Ping;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Acamposm\Ping\PingCommandBuilder;
+use Spatie\DiscordAlerts\Facades\DiscordAlert;
 
 class CheckDnsStatusEveryFiveMinutes extends Command
 {
@@ -38,13 +41,52 @@ class CheckDnsStatusEveryFiveMinutes extends Command
             // dd($domain);
             // $records = $dns->getRecords($domain->name);]
             try {
-                
+                // $command = (new PingCommandBuilder('http://localhost:8000/'));
+                // $command = new PingCommandBuilder('http://score.siaksi.com');
+
+                // $ping = (new Ping($command))->run();
+
+                    // $ip = '127.0.0.1';
+                    // $port = '22';
+                    $url = $domain->name;
+                    $ch = curl_init($url);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    $data = curl_exec($ch);
+                    $health = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+
+                    dd($health);
+                    dd($data);
                 // $records = $dns->getRecords($domain->name);
-                $records = $dns->getRecords('http://localhost:8000/admin/login');
-                dd($records);
-                Log::info(json_encode($records,JSON_PRETTY_PRINT));
+                // $res = ::
+                // $records = $dns->getRecords('http://localhost:8000/admin/login');
+                // $records = $dns->getRecords('http://score.siaksi.com/pinger');
+                // $records = $dns->getRecords('http://score.siaksi.com/pinger');
+                // dd($records);
+                // Log::info(json_encode($records,JSON_PRETTY_PRINT));
+                Log::info(json_encode($health,JSON_PRETTY_PRINT));
+                // Log::info(json_encode($ping,JSON_PRETTY_PRINT));
             } catch (Exception $e) {
                 dd($e);
+                Log::info(json_encode($e,JSON_PRETTY_PRINT));
+                // Log::info(json_encode($e->getMessage(),JSON_PRETTY_PRINT));
+                // DiscordAlert::to($domain->webhook_url)->message("You have a new subscriber to the {$domain->name} newsletter!",[
+                DiscordAlert::to('https://discord.com/api/webhooks/1294304304198582353/Fr887MlQARDOT260jZ3cGjWqzWV2_FiG6ht5BMZriXEleqQwf60QGb7-FSZktlifTMM5')
+                ->message("Issue Accessing {$domain->name} !",
+                [[
+                    'title' => 'Alert!',
+                    'description' => $e->getMessage(),
+                    // 'description' => 'My description',
+                    // 'description' => 'My description',
+                    'color' => '#E77625',
+                    'author' => [
+                        'name' => 'Spatie',
+                        'url' => 'https://spatie.be/'
+                    ]    
+                ]]);
+                // dd($e);
             }
             // $a = dns_get_record($domain->name,DNS_TXT);
             // $a = dns_check_record($domain->name,DNS_TXT);
